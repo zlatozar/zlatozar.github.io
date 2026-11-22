@@ -1,0 +1,6 @@
+title: My Codding Blog
+description: Notes, ideas, and things I’m learning.
+url: "https://zlatozar.github.io"
+baseurl: ""
+theme: minima
+permalink: /:title/
