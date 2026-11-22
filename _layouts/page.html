@@ -1,0 +1,21 @@
+---
+layout: default
+---
+
+<article class="page-shell">
+  <header class="page-hero">
+    <div class="container container--narrow">
+      {%- if page.eyebrow -%}
+        <p class="eyebrow">{{ page.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="page-hero__title">{{ page.title | escape }}</h1>
+      {%- if page.subtitle -%}
+        <p class="page-hero__subtitle">{{ page.subtitle | escape }}</p>
+      {%- endif -%}
+    </div>
+  </header>
+
+  <div class="container container--narrow prose">
+    {{ content }}
+  </div>
+</article>

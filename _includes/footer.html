@@ -1,0 +1,18 @@
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__left">
+      <p class="site-footer__brand">
+        <strong>{{ site.author.name }}</strong> &middot; От дума на дума
+      </p>
+      <p class="site-footer__note">
+        Notes on software architecture, structured thinking, functional programming, and craft.
+      </p>
+    </div>
+    <div class="site-footer__links">
+      <a href="{{ '/about/' | relative_url }}">About</a>
+      <a href="{{ '/archive/' | relative_url }}">Archive</a>
+      <a href="https://github.com/{{ site.author.github }}" rel="noopener noreferrer" target="_blank">GitHub</a>
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+    </div>
+  </div>
+</footer>

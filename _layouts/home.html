@@ -1,0 +1,183 @@
+---
+layout: default
+---
+
+<section class="hero">
+  <div class="container hero__grid">
+    <div class="hero__intro">
+      <p class="eyebrow">
+        <span class="eyebrow__dot" aria-hidden="true"></span>
+        От дума на дума &middot; Engineering Journal
+      </p>
+      <h1 class="hero__title">
+        Structured thinking, output-first design, and software built to last.
+      </h1>
+      <p class="hero__lead">
+        I’m <strong>Zlatozar Zhelyazkov</strong>, a Solution Engineer and Software Architect
+        with 25+ years of building systems across telecom, IoT, cloud, payments, and healthcare.
+        Here I write about domain modeling, functional programming, compilers, and the quiet
+        mental models behind durable software.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#latest-writing">Read latest notes</a>
+        <a class="btn btn--ghost" href="{{ '/about/' | relative_url }}">About &amp; CV</a>
+      </div>
+    </div>
+
+    <aside class="hero__card" aria-label="Author snapshot">
+      <div class="field-card">
+        <figure class="field-card__media">
+          <img
+            src="{{ '/assets/images/Zlatozar_Zhelyazkov_2026_small.jpg' | relative_url }}"
+            alt="Zlatozar Zhelyazkov at a software engineering conference"
+            loading="eager"
+          />
+          <figcaption class="field-card__caption">Conferences, architecture &amp; engineering talks</figcaption>
+        </figure>
+        <div class="field-card__body">
+          <div class="field-card__header">
+            <span class="field-card__badge">Field Notes</span>
+            <span class="field-card__mono">Sofia, BG</span>
+          </div>
+          <dl class="field-card__list">
+            <div class="field-card__row">
+              <dt>Role</dt>
+              <dd>Solution Engineer @ B. Braun Medical</dd>
+            </div>
+            <div class="field-card__row">
+              <dt>Focus</dt>
+              <dd>DDD, Hexagonal Arch, Spec-Driven Design</dd>
+            </div>
+            <div class="field-card__row">
+              <dt>Languages</dt>
+              <dd>Java, Python, F#, Common Lisp, C</dd>
+            </div>
+            <div class="field-card__row">
+              <dt>Offline</dt>
+              <dd>Beekeeping, hiking, swimming, books</dd>
+            </div>
+          </dl>
+          <div class="field-card__footer">
+            <span>Open source &amp; studies:</span>
+            <a href="https://github.com/{{ site.author.github }}" rel="noopener noreferrer" target="_blank">
+              github.com/{{ site.author.github }} &nearr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="latest-writing" class="section">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Latest Writing</h2>
+        <p class="section__sub">Long-form notes, walkthroughs, and architectural essays.</p>
+      </div>
+      <a class="section__link" href="{{ '/archive/' | relative_url }}">All posts &rarr;</a>
+    </div>
+
+    <div class="post-list">
+      {%- for post in site.posts -%}
+        {%- assign words = post.content | number_of_words -%}
+        {%- assign mins = words | plus: 199 | divided_by: 200 -%}
+        {%- if mins < 1 -%}{%- assign mins = 1 -%}{%- endif -%}
+        <article class="post-card">
+          <a class="post-card__link" href="{{ post.url | relative_url }}">
+            <div class="post-card__meta">
+              <time datetime="{{ post.date | date_to_xmlschema }}">
+                {{ post.date | date: "%b %-d, %Y" }}
+              </time>
+              <span aria-hidden="true">&middot;</span>
+              <span>{{ mins }} min read</span>
+              {%- if post.categories.size > 0 -%}
+                <span aria-hidden="true">&middot;</span>
+                <span class="post-card__cat">{{ post.categories | first }}</span>
+              {%- endif -%}
+            </div>
+
+            <h3 class="post-card__title">{{ post.title | escape }}</h3>
+
+            {%- if post.description -%}
+              <p class="post-card__excerpt">{{ post.description | escape }}</p>
+            {%- elsif post.excerpt -%}
+              <p class="post-card__excerpt">{{ post.excerpt | strip_html | truncatewords: 32 }}</p>
+            {%- endif -%}
+
+            {%- if post.tags.size > 0 -%}
+              <ul class="tag-row" aria-label="Topics">
+                {%- for tag in post.tags limit: 4 -%}
+                  <li class="tag">{{ tag }}</li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            <span class="post-card__cta" aria-hidden="true">Read essay &rarr;</span>
+          </a>
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<section class="section section--tinted">
+  <div class="container">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Selected Open Source &amp; Studies</h2>
+        <p class="section__sub">Compilers, functional programming exercises, and classic CS texts.</p>
+      </div>
+      <a class="section__link" href="https://github.com/{{ site.author.github }}" rel="noopener noreferrer" target="_blank">
+        github.com/{{ site.author.github }} &nearr;
+      </a>
+    </div>
+
+    <div class="project-grid">
+      <a class="project-card" href="https://github.com/zlatozar/TigerLanguage" rel="noopener noreferrer" target="_blank">
+        <div class="project-card__top">
+          <span class="project-card__lang">F#</span>
+          <span class="project-card__arrow">&nearr;</span>
+        </div>
+        <h3 class="project-card__title">TigerLanguage</h3>
+        <p class="project-card__desc">
+          An implementation of Andrew Appel’s Tiger language compiler written in F#, featured in F# Weekly.
+        </p>
+      </a>
+
+      <a class="project-card" href="https://github.com/zlatozar/study-paip" rel="noopener noreferrer" target="_blank">
+        <div class="project-card__top">
+          <span class="project-card__lang">Common Lisp</span>
+          <span class="project-card__arrow">&nearr;</span>
+        </div>
+        <h3 class="project-card__title">study-paip</h3>
+        <p class="project-card__desc">
+          Working through Peter Norvig’s <em>Paradigms of Artificial Intelligence Programming</em> in Lisp.
+        </p>
+      </a>
+
+      <a class="project-card" href="https://github.com/zlatozar/EofFP" rel="noopener noreferrer" target="_blank">
+        <div class="project-card__top">
+          <span class="project-card__lang">Functional</span>
+          <span class="project-card__arrow">&nearr;</span>
+        </div>
+        <h3 class="project-card__title">EofFP</h3>
+        <p class="project-card__desc">
+          Exploration of functional programming principles, recursion, closures, and compositional design.
+        </p>
+      </a>
+
+      <a class="project-card" href="https://github.com/zlatozar/etudes" rel="noopener noreferrer" target="_blank">
+        <div class="project-card__top">
+          <span class="project-card__lang">Etudes</span>
+          <span class="project-card__arrow">&nearr;</span>
+        </div>
+        <h3 class="project-card__title">etudes</h3>
+        <p class="project-card__desc">
+          Algorithmic puzzles and problem-solving etudes inspired by Polya and <em>Thinking Mathematically</em>.
+        </p>
+      </a>
+    </div>
+  </div>
+</section>

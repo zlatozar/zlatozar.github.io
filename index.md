@@ -1,10 +1,7 @@
 ---
 layout: home
-title: Welcome
+title: Home
+description: >-
+  Engineering journal of Zlatozar Zhelyazkov — software architecture,
+  domain-driven design, functional programming, and structured thinking.
 ---
-
-## Welcome to My Blog
-
-Hi! I’m **Zlatozar**. This is where I share notes, ideas, and things I’m learning.
-
-The latest posts appear below. Thanks for stopping by!

@@ -1,6 +1,42 @@
-title: My Codding Blog
-description: Notes, ideas, and things I’m learning.
+title: "Zlatozar Zhelyazkov"
+tagline: "От дума на дума · Notes on software architecture, structured thinking, and craft"
+description: >-
+  Personal engineering journal of Zlatozar Zhelyazkov — notes on software
+  architecture, domain-driven design, functional programming, compilers, and
+  structured thinking.
 url: "https://zlatozar.github.io"
 baseurl: ""
-theme: minima
+lang: en
+
+author:
+  name: "Zlatozar Zhelyazkov"
+  email: "zlatozar@gmail.com"
+  github: "zlatozar"
+
 permalink: /:title/
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: "highlight"
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Zlatozar Zhelyazkov"
+
+exclude:
+  - .idea
+  - Readme.md
+  - Dockerfile
+  - compose.yaml
+  - justfile

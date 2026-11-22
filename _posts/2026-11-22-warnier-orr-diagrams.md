@@ -1,4 +1,12 @@
-# Why Warnier/Orr Thinking Still Matters (Even When Nobody Draws Bracket Trees)
+---
+layout: post
+title: "Why Warnier/Orr Thinking Still Matters"
+subtitle: "Even when nobody draws bracket trees, designing from outputs backward clarifies types, invariants, and architecture."
+description: "Why 1970s Warnier/Orr structured thinking—output-first design, explicit cardinality, and mutually exclusive choices—maps cleanly to modern Python, DDD, and Hexagonal Architecture."
+date: 2026-11-22 10:00:00 +0200
+categories: [Architecture]
+tags: [warnier-orr, ddd, hexagonal-architecture, python, design]
+---
 
 Warnier/Orr diagrams grew out of 1970s structured programming and batch data processing. Jean-Dominique Warnier introduced the method in *Logical Construction of Programs* (LCP, 1974) and later broadened it to whole systems in *Logical Construction of Systems* (LCS, 1981). In the United States, Kenneth Orr extended and popularized the approach in *Structured Systems Development* (1977), which grew into his Data Structured Systems Development (DSSD) method. Instead of arrow-heavy flowcharts, the diagrams model data and program hierarchies with nested brackets, repetition bounds like `(0, n)` and `(1, n)`, and mutually exclusive choices (`⊕`).
 

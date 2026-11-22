@@ -1,0 +1,110 @@
+---
+layout: default
+---
+
+{%- assign words = content | number_of_words -%}
+{%- assign mins = words | plus: 199 | divided_by: 200 -%}
+{%- if mins < 1 -%}{%- assign mins = 1 -%}{%- endif -%}
+
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress__bar" id="reading-progress-bar"></div>
+</div>
+
+<article class="post-shell" itemscope itemtype="http://schema.org/BlogPosting">
+  <header class="post-hero">
+    <div class="container container--narrow">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ '/' | relative_url }}">&larr; All writing</a>
+      </nav>
+
+      <div class="post-hero__meta">
+        <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+          {{ page.date | date: "%B %-d, %Y" }}
+        </time>
+        <span aria-hidden="true">&middot;</span>
+        <span>{{ mins }} min read</span>
+        <span aria-hidden="true">&middot;</span>
+        <span>{{ words }} words</span>
+      </div>
+
+      <h1 class="post-hero__title" itemprop="name headline">{{ page.title | escape }}</h1>
+
+      {%- if page.subtitle -%}
+        <p class="post-hero__subtitle">{{ page.subtitle | escape }}</p>
+      {%- elsif page.description -%}
+        <p class="post-hero__subtitle">{{ page.description | escape }}</p>
+      {%- endif -%}
+
+      {%- if page.tags.size > 0 or page.categories.size > 0 -%}
+        <ul class="tag-row" aria-label="Post topics">
+          {%- for cat in page.categories -%}
+            <li class="tag tag--accent">{{ cat }}</li>
+          {%- endfor -%}
+          {%- for tag in page.tags -%}
+            <li class="tag">{{ tag }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </header>
+
+  <div class="container post-layout">
+    <aside class="post-toc" id="post-toc" aria-label="Table of contents" hidden>
+      <div class="post-toc__sticky">
+        <p class="post-toc__heading">On this page</p>
+        <nav id="post-toc-nav"></nav>
+      </div>
+    </aside>
+
+    <div class="prose e-content" itemprop="articleBody" id="post-content">
+      {{ content }}
+    </div>
+  </div>
+
+  <footer class="container container--narrow post-footer">
+    <div class="author-box">
+      <img
+        class="author-box__photo"
+        src="{{ '/assets/images/zlatozar.jpeg' | relative_url }}"
+        alt="{{ site.author.name | escape }}"
+        width="64"
+        height="64"
+        loading="lazy"
+      />
+      <div class="author-box__body">
+        <p class="author-box__name">Written by {{ site.author.name }}</p>
+        <p class="author-box__bio">
+          Solution Engineer &amp; Software Architect. Writing about domain modeling,
+          functional thinking, compilers, and systems that age gracefully.
+        </p>
+        <div class="author-box__links">
+          <a href="{{ '/about/' | relative_url }}">About &amp; CV</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="https://github.com/{{ site.author.github }}" rel="noopener noreferrer" target="_blank">GitHub</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="{{ '/feed.xml' | relative_url }}">RSS Feed</a>
+        </div>
+      </div>
+    </div>
+
+    {%- if page.previous or page.next -%}
+      <nav class="post-pager" aria-label="Post navigation">
+        {%- if page.previous -%}
+          <a class="post-pager__item" href="{{ page.previous.url | relative_url }}">
+            <span class="post-pager__label">&larr; Previous</span>
+            <span class="post-pager__title">{{ page.previous.title | escape }}</span>
+          </a>
+        {%- else -%}
+          <span></span>
+        {%- endif -%}
+
+        {%- if page.next -%}
+          <a class="post-pager__item post-pager__item--next" href="{{ page.next.url | relative_url }}">
+            <span class="post-pager__label">Next &rarr;</span>
+            <span class="post-pager__title">{{ page.next.title | escape }}</span>
+          </a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+  </footer>
+</article>
