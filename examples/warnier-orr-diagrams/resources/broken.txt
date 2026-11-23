@@ -1,0 +1,6 @@
+?papersize 10 56
+?margin 3 54
+This paragraph is fine.
+
+?margin 3 60
+The margin above is wider than the paper.

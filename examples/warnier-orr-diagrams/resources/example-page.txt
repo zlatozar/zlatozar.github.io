@@ -1,0 +1,27 @@
+?papersize 10 56
+?margin 3 54
+?center
+PRINTER'S DEVIL SAMPLE
+?blank 1
+?paragraph 3 0
+Warnier and Orr showed that starting from the output
+hierarchy makes tricky formatting rules much easier to
+organize. When a command triggers a paragraph break,
+the current paragraph finishes under the old settings!
+?mode justify
+?paragraph 0 1
+Every justified line stretches the word gaps up to the
+right margin, except the last line of the paragraph.
+The extra spaces go to the left gaps on one line and to
+the right gaps on the next, so no river of white space
+runs down one side of the text.
+?mode unfilled
+?paragraph 0 1
+Item       Qty   Price
+----------------------
+Apple       10    1.20
+Pear         4    1.80
+?page
+?mode fill
+?paragraph 2 0
+A new page begins cleanly after an explicit page break.

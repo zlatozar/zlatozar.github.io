@@ -1,0 +1,1 @@
+"""Simplified PrintersDevil formatter package."""

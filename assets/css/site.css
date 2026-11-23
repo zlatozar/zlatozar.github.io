@@ -1138,6 +1138,87 @@ a:hover {
 
 /* Post Footer & Author Box
    ========================================================================== */
+.post-companion {
+  margin-top: 1.15rem;
+}
+
+.post-companion__link {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.48rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--teal) 32%, var(--border));
+  background-color: var(--teal-soft);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.86rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.post-companion__link:hover {
+  color: var(--ink);
+  border-color: var(--teal);
+  transform: translateY(-1px);
+}
+
+.post-companion__label {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--teal);
+}
+
+.post-companion__path {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.companion-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.35rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--teal) 30%, var(--border));
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--teal-soft), var(--bg-elevated) 65%);
+  box-shadow: var(--shadow-sm);
+}
+
+.companion-card__eyebrow {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--teal);
+}
+
+.companion-card__title {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+
+.companion-card__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.companion-card__desc code {
+  font-family: var(--font-mono);
+  font-size: 0.84em;
+}
+
 .post-footer {
   padding-bottom: 4rem;
 }
@@ -1420,6 +1501,20 @@ a:hover {
   margin: 0;
   font-size: 0.84rem;
   color: var(--ink-subtle);
+}
+
+.site-footer__license {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-subtle);
+}
+
+.site-footer__license a {
+  color: var(--ink-muted);
+}
+
+.site-footer__license a:hover {
+  color: var(--accent);
 }
 
 .site-footer__links {

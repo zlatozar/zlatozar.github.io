@@ -1,0 +1,40 @@
+set shell := ["sh", "-eu", "-c"]
+
+# List available recipes
+default:
+    @just --list
+
+# Install dependencies into .venv
+sync:
+    uv sync
+
+# Run Ruff linter
+lint:
+    uv run ruff check
+
+# Check formatting with Ruff
+fmt-check:
+    uv run ruff format --check
+
+# Format Python files with Ruff
+fmt:
+    uv run ruff format
+
+# Check types with ty (a missing `match` case fails here)
+typecheck:
+    uv run ty check
+
+# Run Ruff lint and format checks, then the type checker
+check: lint fmt-check typecheck
+
+# Format the sample page as text
+demo:
+    uv run printers-devil resources/example-page.txt
+
+# Format the sample page as JSON
+demo-json:
+    uv run printers-devil --format json resources/example-page.txt
+
+# Show an error report for a broken file (the "-" lets the recipe go on after the error)
+demo-error:
+    -uv run printers-devil resources/broken.txt

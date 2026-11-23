@@ -45,6 +45,21 @@ layout: default
           {%- endfor -%}
         </ul>
       {%- endif -%}
+
+      {%- if page.example -%}
+        <div class="post-companion">
+          <a
+            class="post-companion__link"
+            href="https://github.com/zlatozar/zlatozar.github.io/tree/main/examples/{{ page.example }}"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span class="post-companion__label">Companion Code</span>
+            <code class="post-companion__path">examples/{{ page.example }}</code>
+            <span aria-hidden="true">&nearr;</span>
+          </a>
+        </div>
+      {%- endif -%}
     </div>
   </header>
 
@@ -62,6 +77,27 @@ layout: default
   </div>
 
   <footer class="container container--narrow post-footer">
+    {%- if page.example -%}
+      <aside class="companion-card" aria-label="Companion project">
+        <div class="companion-card__body">
+          <p class="companion-card__eyebrow">Companion Project</p>
+          <p class="companion-card__title">Explore the runnable code on GitHub</p>
+          <p class="companion-card__desc">
+            Full source code and demo instructions live in
+            <code>examples/{{ page.example }}</code>.
+          </p>
+        </div>
+        <a
+          class="btn btn--ghost"
+          href="https://github.com/zlatozar/zlatozar.github.io/tree/main/examples/{{ page.example }}"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          View on GitHub &nearr;
+        </a>
+      </aside>
+    {%- endif -%}
+
     <div class="author-box">
       <img
         class="author-box__photo"

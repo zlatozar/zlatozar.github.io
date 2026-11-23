@@ -36,7 +36,9 @@ defaults:
 
 exclude:
   - .idea
+  - LICENSE
   - Readme.md
   - Dockerfile
   - compose.yaml
   - justfile
+  - examples
