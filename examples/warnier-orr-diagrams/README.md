@@ -345,25 +345,10 @@ every rule and every edge case must have exactly one place in the code:
   diagrams already say what to do.
 * **Invalid input** is rejected once, at the edge of the hexagon (Pass 4).
 
-| Case | What happens | Where |
-| --- | --- | --- |
-| empty file, or only commands | no pages, empty output | `paginate`: `Page (0,n)` |
-| `?page` many times in a row | one new page | `_fill_page`: `Line (1,h)` |
-| `?page` at the end of the file | no empty last page | `_fill_page`: `Line (1,h)` |
-| gap line at the top of a page | dropped | `_fill_page` |
-| paragraph across a page edge | split between the pages | the line stream |
-| one long word on a justified line | printed as it is, not stretched | `_stretch` |
-| `?blank 0` | nothing | `typeset` |
-| word longer than the line | error | `Paragraph.__post_init__` |
-| margins or indent outside the paper | error | `Layout.__post_init__` |
-| right margin past the paper width | error | `markup.py`: `?margin` |
-| unknown command, bad numbers | error | `markup.py`: `_obey_command`, `_numbers` |
-| `?center` with no text line after it | error | `markup.py`: `_centered` |
-| missing file, or not UTF-8 | `Error: ...`, exit code 1 | `cli.py`: `main` |
-
-All stages are generators, so an error can appear while some pages are already made.
-The renderer builds the whole output before anything is printed, so the user never sees
-half a document.
+Lazy in the middle, eager at the end. The stages pull one item at a time, so an input
+error can come after some pages are made. The renderer builds the whole output, and
+`main` prints it only if no error came: the user gets all of it or nothing. The price is
+memory for the whole output.
 
 ## Where We Leave the Classic Method
 
@@ -380,17 +365,6 @@ they say the same thing more clearly:
 * **The LIF reuses a type of the LOS.** `PageBreak` is defined in `pages.py` and used in
   both trees. The input is designed from the output, so this is natural.
 * **One space after a sentence.** Modern typography, and one rule less.
-
-## Exercises
-
-1. **Widows and orphans.** A good typesetter does not leave the first line of a
-   paragraph alone at the bottom of a page. Which tree must change? Hint: the line
-   stream needs a little more information, for example "keep with the next line".
-2. **An HTML renderer.** Add `adapters/html_pages.py` and register it in `RENDERERS` in
-   `cli.py`. Check that no file in `domain/` changes.
-3. **A new command.** Add `?right`, which prints the next line against the right margin.
-   Follow the steps: a new block in the LIF (`document.py`), a new `case` in the LPS
-   (`typesetting.py`) and a new `case` in the inbound adapter (`markup.py`).
 
 ## Use It With a Coding Agent
 
