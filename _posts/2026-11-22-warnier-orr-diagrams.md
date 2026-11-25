@@ -494,8 +494,9 @@ they close the loop: the page you wrote first is the page you check last.
 Sometimes two structures do not line up, and one loop cannot follow both. Jackson called
 this a *structure clash*. Hansen follows his advice: do not force one loop to serve two
 trees. **Use two programs joined by a stream, one per structure**. Jackson named three
-kinds of clash: boundary, ordering, and interleaving. Each needs its own information in
-the stream, and each has its own cost.
+kinds of clash: boundary, ordering, and interleaving. His ordering clash hides two needs,
+grouping and sorting, so this post splits it in two. Each kind needs its own information
+in the stream, and each has its own cost.
 
 ### Boundary Clash
 
@@ -562,20 +563,32 @@ with pages. Its line stream carries two markers next to the text: `GapLine`, the
 before a paragraph, dropped at the top of a page, and `PageBreak`, which can change the
 page height.
 
-### Ordering Clash
+### Grouping and Ordering Clashes
 
 You have already met one, in pass 4. The CSV file lists the rows as they were recorded,
 with all stores mixed. The report needs them store by store, in the order of the store
 master. Nothing in the file marks the end of a store: the last row of the file may still
 belong to the first store. So no store is complete before the whole file is read.
 
-The store id in every row is the key: `read_input` puts each row into the list of its
-store, and the store master gives the order of the stores. The stream needs nothing more.
+Jackson called this an ordering clash. His files were sequential, and the usual way to
+bring the rows of one store together was to sort the file. With a dict in memory, these
+are two different needs:
+
+* **Grouping:** the items of one group are scattered, and the stream carries a group
+  key. `read_input` starts one empty list per store from the store master, and puts each
+  row into the list of its store. Nothing is sorted: the store master gives the order of
+  the stores, and the file gives the order inside each store.
+* **Ordering:** the groups, or the items inside a group, must follow a value in the
+  data: an id, a date, a total. The stream carries a sort key. If finance wanted the
+  stores by name, the report would need a sort; as it is, it does not.
+
+A sort by the group key does both at once. In Python, that is `sorted` followed by
+`itertools.groupby`, which joins only neighbours. It is also the way out when the groups
+do not fit in memory: sort outside the program, with an external sort or with `ORDER BY`
+in the database, and each store arrives in one piece.
 
 The cost is waiting. The two programs cannot run together; the grouping stands between
-them. A month of sales fits in memory, and a dict, or `sorted` followed by
-`itertools.groupby`, is enough. When the input is too large for memory, sort it outside
-the program: with an external sort, or with `ORDER BY` in the database.
+them. A month of sales fits in memory, so a dict is enough.
 
 ### Interleaving Clash
 
@@ -626,26 +639,28 @@ program. Then look at the output group:
 
 * It cuts across the input groups, like a page that holds the end of one store and the
   start of the next: a **boundary clash**. The stream carries markers.
-* It needs the input items in another order, like rows by store instead of by time: an
-  **ordering clash**. The stream carries a sort key.
+* Its items are scattered, and nothing marks where it ends, like the rows of one store in
+  the sales file: a **grouping clash**. The stream carries a group key.
+* It must follow a value in the data that the input does not follow, like customers by
+  id: an **ordering clash**. The stream carries a sort key.
 * It collects its items while other groups are still open, like the lines of one session
   between login and logout: an **interleaving clash**. The stream carries a group key.
 
-Ordering and interleaving look alike: in both, items of many groups come mixed. One
+Grouping and interleaving look alike: in both, items of many groups come mixed. One
 question tells them apart: can a group be finished before the input ends?
 
-* No. Nothing marks the end of a group, so you read the whole input, and the groups come
-  out in key order. That is an ordering clash, like the sales file.
+* No. Nothing marks the end of a group, so you read the whole input and put each item
+  into the bucket of its key. That is a grouping clash, like the sales file.
 * Yes. Each group has its own Begin and End, so it comes out as soon as it ends, and the
   groups come out in the order they end. That is an interleaving clash, like the
   sessions.
 
-The border is also a design choice. Any interleaving clash can be solved as an ordering
-clash: read the whole log, sort it by session id, then group. Do that when you can wait
-for the end of the input, or when the output needs key order: a session report sorted by
-user is an ordering clash, even with logout lines. Keep one state per open group only
-when you cannot wait: the log never stops, or each summary is needed as soon as its
-session ends.
+The border is also a design choice. Any interleaving clash can be solved as a grouping
+clash: read the whole log, then group it by session id. Do that when you can wait for the
+end of the input. A session report sorted by user also has an ordering clash, even with
+logout lines, and one sort by user and session solves both. Keep one state per open
+group only when you cannot wait: the log never stops, or each summary is needed as soon
+as its session ends.
 
 ## A Way of Thinking, Not a New Method
 

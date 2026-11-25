@@ -9,35 +9,52 @@ flattens one tree into a stream, and the second builds the other tree from that 
 1. Take one pair of trees: the real input and the output tree, or the output tree and
    the physical tree (pages, batches, chunks).
 2. For each group in the second tree, ask: which group of the first tree holds all of
-   its items?
-3. Read the verdict from the table.
+   its items? If none does, ask: do its items come together, or scattered among the
+   items of other groups?
+3. Ask about order: do the groups, and the items inside each group, come in the order
+   the second tree needs?
+4. Read the verdicts from the table. A pair can have more than one: a grouping clash
+   often comes with an ordering clash.
 
 | What you find | Verdict | What the stream carries |
 | --- | --- | --- |
-| Each group sits inside one group of the first tree | no clash | nothing extra; the step is a bind |
-| A group cuts across groups of the first tree | boundary clash | markers for the boundaries |
-| The same groups come in a different order | ordering clash | a sort key |
-| One group of the first tree mixes items of many groups | interleaving clash | a group key |
+| Each group sits inside one group of the first tree, in the needed order | no clash | nothing extra; the step is a bind |
+| A group's items come together, but cut across groups of the first tree | boundary clash | markers for the boundaries |
+| A group's items are scattered, and nothing marks where a group ends | grouping clash | a group key |
+| A group's items are scattered, and each group has its own start and end | interleaving clash | a group key |
+| The groups, or the items inside a group, come in another order | ordering clash | a sort key |
 
 A *bind* turns each input node into its own output items and joins the results in order
 (`yield from` in Python, `flatMap` in many other languages). If you can write the step as
 a bind, the structures fit. If an output group needs items from more than one input
 node, the step needs state, and it becomes its own program.
 
-Ordering and interleaving clashes look alike: in both, items of many groups come mixed.
+Grouping and interleaving clashes look alike: in both, items of many groups come mixed.
 Ask: can a group be finished before the input ends?
 
-* No, nothing marks the end of a group: an ordering clash. Read the whole input, then
-  output the groups in key order.
+* No, nothing marks the end of a group: a grouping clash. Read the whole input, and put
+  each item into the bucket of its group key.
 * Yes, each group has its own start and end: an interleaving clash. Keep one state per
   open group, and output each group when it ends, in the order the groups end.
 
-Any interleaving clash can also be solved as an ordering clash, by sorting on the group
-key. Choose that when the program can wait for the end of the input, or when the output
-needs key order. Keep one state per open group only when it cannot wait: the input never
+Grouping and sorting are different needs. Ask: where does the order of the output groups
+come from?
+
+* From outside the data, such as a master list, or from the order in which each group
+  first appears: grouping is enough. A map from key to bucket does it, with no sort.
+* From a value in the data, such as a customer id, a date, or a total: that is also an
+  ordering clash, and it needs a sort. The same holds for the items inside a group.
+
+A sort by the group key also brings each group together, so one sort can solve a
+grouping clash and an ordering clash at once. It is also the way out when the buckets do
+not fit in memory: sort before the program, and each group arrives in one piece.
+
+Any interleaving clash can also be solved by grouping or sorting on the group key.
+Choose that when the program can wait for the end of the input, or when the output needs
+key order. Keep one state per open group only when it cannot wait: the input never
 stops, or each group is needed as soon as it ends.
 
-A pipeline can have more than one clash. Handle them one at a time, each with its own
+A pipeline can have clashes in more than one pair of trees. Handle each pair in its own
 step.
 
 A lookup file, such as a list of names by id, is not a clash. Each output item takes one
@@ -52,14 +69,25 @@ clash check of the design note.
   and the first keeps its place between pulls (Jackson's *program inversion*). The total
   work is the same as with a list between them, but memory holds one group, and the
   first group costs only its own work, whatever the size of the input.
-* **Ordering clash:** nothing comes out until the whole input is read, because the last
-  record may belong to the first group. Ask how large the input can grow. If it fits in
-  memory, group or sort in the program. If not, sort outside it: an external sort, or
-  `ORDER BY` in the database.
+* **Grouping clash:** nothing comes out until the whole input is read, because the last
+  item may belong to the first group. Memory holds every item in its bucket, or one
+  running value per group when the output needs only totals, as SQL `GROUP BY` does.
+  Ask how large the input can grow, and where the order of the groups comes from. If
+  the buckets do not fit in memory, sort by the group key before the program: an
+  external sort, or `ORDER BY` in the database. Then each group arrives in one piece,
+  and the step can stream.
+* **Ordering clash:** ask for the sort key, its direction, and what breaks ties. To sort
+  the groups, the program must hold all of them, so nothing comes out until the whole
+  input is read. Ask how large the input can grow; if it does not fit in memory, sort
+  outside the program, as above. To sort only the items inside each group, it holds one
+  group at a time. When the output needs only the first N, keep the best N so far, not
+  every item.
 * **Interleaving clash:** the steps run together, but the state grows with the number of
   open groups. Ask how a group ends: an end record, a timeout, or the end of the input.
   Ask what happens to groups still open when the input stops: report them as
-  incomplete, or drop them. Without end rules, the state only grows.
+  incomplete, or drop them. Without end rules, the state only grows. The groups come out
+  in the order they end; if the output needs another order, there is also an ordering
+  clash.
 
 When the steps run together, ask one more question: may the user see part of the output
 when a later item is bad? If not, one edge holds everything back until the input is
@@ -100,46 +128,65 @@ Two clues in the physical tree:
 
 ## Words That Hint at a Clash
 
-page, batch, chunk, limit, at most N, per N, group by, sorted by, per customer, session,
-topic, partition, window, split, merge, continued.
+page, batch, chunk, limit, at most N, per N, group by, sorted by, order by, ranked, top N,
+per customer, session, topic, partition, window, split, merge, continued.
 
 A hint is not a verdict. Always run the check.
 
 ## Worked Examples
 
-**Report to pages: boundary clash.** Input: stores, each with transactions. Output:
-pages of 54 lines. One page can hold the end of one store and the start of the next, so
-a page cuts across stores. The stream is lines, and each line carries its store, for the
-"continued" header.
+Each example names what the clash needs: grouping, sorting, both, or neither.
 
-**Statements where each customer starts a new page: no clash.** Output: customers, each
-with their postings. Physical: pages of 50 lines. A customer can fill several pages, but
-no page holds two customers, so each page sits inside one customer. The hint words are
-there (page, at most 50, continued), but the check says no clash. Each customer becomes
-its own pages, and the formatter joins them; the page number is its only running state.
+**Report to pages: boundary clash; neither.** Input: stores, each with transactions.
+Output: pages of 54 lines. One page can hold the end of one store and the start of the
+next, so a page cuts across stores. The stream is lines, and each line carries its
+store, for the "continued" header.
 
-**Stores to lines: no clash.** Each store becomes its own lines, and the results are
-joined. Every output line belongs to one store. This is a bind.
+**Statements where each customer starts a new page: no clash; neither.** Output:
+customers, each with their postings. Physical: pages of 50 lines. A customer can fill
+several pages, but no page holds two customers, so each page sits inside one customer.
+The hint words are there (page, at most 50, continued), but the check says no clash. Each
+customer becomes its own pages, and the formatter joins them; the page number is its
+only running state.
 
-**Orders from a paged API: boundary clash.** Input: pages of 100 order lines. Output:
-one invoice per order. An order can start on one page and end on the next. The stream
-is order lines, and each line carries its order id. If the API does not keep the lines
-of one order together, there is also an ordering clash: sort by order id first.
+**Stores to lines: no clash; neither.** Each store becomes its own lines, and the results
+are joined. Every output line belongs to one store. This is a bind.
 
-**Events by time to a monthly report by customer: ordering clash.** Input: the month's
-payment events in time order. Output: customers, each with their payments. The report is
-built after the month is closed, so the whole input can be sorted. The stream carries
-the customer id as the sort key; sort, then group. Cost question: how many events can a
-month have? If they fit in memory, sort in the program; if not, let the database sort.
+**Orders from a paged API: boundary clash; neither.** Input: pages of 100 order lines.
+Output: one invoice per order. An order can start on one page and end on the next. The
+stream is order lines, and each line carries its order id. If the API does not keep the
+lines of one order together, there is also a grouping clash: put the lines into buckets
+by order id. Sort only if the invoices must come in order-id order.
 
-**Sessions in a live log: interleaving clash.** Input: a log stream where the lines of
-many user sessions are mixed. Output: one summary as soon as each session ends. Many
-sessions are open at once. Each line carries its session id as the group key, and the
-second program keeps one state per open session. Cost questions: does every session end
-with a logout line, or is a timeout needed? What happens to sessions still open when the
-stream stops?
+**Sales rows to a report by store: grouping clash; grouping only.** Input: the month's
+transaction rows of all stores, mixed in one file. Output: stores in the order of the
+store list, each with its transactions in file order. Put each row into the bucket of its
+store id. The store list gives the order of the groups, and the file gives the order
+inside each group, so nothing is sorted. See [sales-report.md](sales-report.md).
 
-**Paragraphs to chunks of at most N tokens: boundary clash.** Input: documents with
-paragraphs. Output: chunks for an embedding model. A long paragraph can be split across
-chunks. The stream is sentences, and each sentence carries its document and paragraph,
-so each chunk can say where it came from.
+**Events by time to a monthly report by customer: grouping and ordering clash; both.**
+Input: the month's payment events in time order. Output: customers in id order, each
+with their payments in time order. The events of one customer are scattered, and the
+customer order is a value in the data. One sort by customer id, then time, does both:
+each customer comes in one piece, in key order. The report is built after the month is
+closed, so the program can wait for the whole input. Cost question: how many events can
+a month have? If they fit in memory, sort in the program; if not, use `ORDER BY` in the
+database.
+
+**Orders by time to the 20 largest orders: ordering clash; sorting only.** Input: the
+day's orders in time order. Output: the 20 largest, by amount. Each order is one item,
+so there is nothing to group. The sort key is the amount, largest first, and the order
+id breaks ties. Only the first 20 are needed, so keep the best 20 so far, not every
+order.
+
+**Sessions in a live log: interleaving clash; grouping only.** Input: a log stream where
+the lines of many user sessions are mixed. Output: one summary as soon as each session
+ends, in the order the sessions end. Many sessions are open at once. Each line carries
+its session id as the group key, and the second program keeps one state per open
+session. Cost questions: does every session end with a logout line, or is a timeout
+needed? What happens to sessions still open when the stream stops?
+
+**Paragraphs to chunks of at most N tokens: boundary clash; neither.** Input: documents
+with paragraphs. Output: chunks for an embedding model. A long paragraph can be split
+across chunks. The stream is sentences, and each sentence carries its document and
+paragraph, so each chunk can say where it came from.

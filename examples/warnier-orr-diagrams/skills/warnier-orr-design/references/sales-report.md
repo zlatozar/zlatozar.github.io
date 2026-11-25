@@ -97,10 +97,13 @@ each: `T1,S1,SALE,120.00`.
 
 **Clash check:**
 
-* Real input against the output tree: the rows of all stores are mixed in one file. That
-  is an ordering clash, with the store id as the key. A month of rows fits in memory, so
-  the file is read whole, and the parser solves it: it groups the rows by store id, then
-  builds the input tree.
+* Real input against the output tree: the rows of one store are scattered through
+  `sales.csv`, and nothing marks where a store ends. That is a grouping clash, with the
+  store id as the group key. It needs no sort: the order of the stores comes from
+  `stores.csv`, and the rows of each store keep their file order. A month of rows fits in
+  memory, so the parser reads the file whole. It starts one empty bucket per store from
+  `stores.csv`, puts each row into the bucket of its store id, then builds the input
+  tree.
 * Output tree against the physical tree: there is no physical tree, and each store
   becomes its own lines, so formatting is a bind. If finance later asks for pages of 54
   lines with a "continued" header, that is a boundary clash: pages cut across stores.

@@ -102,10 +102,12 @@ have only a list of columns, ask for a few real lines.
 Then compare the trees in pairs: each real input against the output tree, and the output
 tree against the physical tree, if there is one. If a pair has different groups or a
 different order, run the clash check in [clashes.md](references/clashes.md). For each
-clash, ask its cost questions from there: for an ordering clash, how large the input can
-grow; for an interleaving clash, how a group ends and what happens to groups still open
-when the input stops. When the steps run together, as in a boundary or an interleaving
-clash, also ask whether the user may see part of the output when a later item is bad.
+clash, ask its cost questions from there: for a grouping clash, how large the input can
+grow and where the order of the groups comes from; for an ordering clash, the sort key,
+its direction, what breaks ties, and how large the input can grow; for an interleaving
+clash, how a group ends and what happens to groups still open when the input stops. When
+the steps run together, as in a boundary or an interleaving clash, also ask whether the
+user may see part of the output when a later item is bad.
 
 **Stop** if there is a clash or a new open question: show the whole design note, and
 wait for approval. Otherwise, show the note and go on.
@@ -126,10 +128,12 @@ a broken row, is collected and returned as the bad-case output from phase 1. A b
 setup or a broken invariant in the core is a bug: fail fast.
 
 If phase 2 found a clash between the real input and the output tree, solve it here, as
-designed there. For an ordering clash, group the rows by key and sort them; if the input
-is too large to read whole, sort it before the parser, with an external sort or with
-`ORDER BY` in the database. For an interleaving clash, keep one state per group key and
-apply the end rules from phase 2.
+designed there. For a grouping clash, put the rows into buckets by group key; when the
+order of the groups comes from a master list or from first appearance, do not sort. For
+an ordering clash, sort by the sort key. If the input is too large to read whole, sort it
+before the parser, with an external sort or with `ORDER BY` in the database; a sort by
+the group key also solves a grouping clash. For an interleaving clash, keep one state
+per group key and apply the end rules from phase 2.
 
 **Check:** every rule from phase 1 has a place where it is checked. Put each rule as
 early as the language allows: type, then constructor, then parser, then test.
@@ -170,8 +174,9 @@ phase 2 adds the rest. Keep it short.
 
 **Input tree:** <indented tree, with the real input next to it>
 **Calculated:** <items the program computes>
-**Clash check:** <for each pair of trees: no clash, or the kind of clash, what the stream
-carries, and the answers to its cost questions>
+**Clash check:** <for each pair of trees: no clash, or each kind of clash, what it needs
+(grouping, sorting, or both), what the stream carries, and the answers to its cost
+questions>
 **New questions:** <what the comparison with the real input raised>
 ```
 
