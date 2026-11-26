@@ -158,4 +158,17 @@
       }
     }
   }
+
+  // 6. Open external links and full-size figure images in a new tab
+  proseBlocks.forEach(function (prose) {
+    prose.querySelectorAll("a[href]").forEach(function (link) {
+      if (!/^https?:$/.test(link.protocol)) return;
+      var isExternal = link.hostname !== window.location.hostname;
+      var isFigure = !!link.closest("figure");
+      if (!isExternal && !isFigure) return;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      if (isExternal && !isFigure) link.classList.add("is-external");
+    });
+  });
 })();

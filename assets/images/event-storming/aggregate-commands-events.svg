@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 610 320" role="img" aria-labelledby="title desc" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="title">An aggregate pairs commands with events</title>
+  <desc id="desc">Three blue command notes (Place order, Change address, Cancel order) on the left, one tall yellow Order aggregate in the middle, and orange event notes on the right: Order placed; Address changed; Order cancelled and Refund requested.</desc>
+  <rect width="610" height="320" fill="#ffffff"/>
+  <g font-size="15" font-style="italic" fill="#6b6b6b" text-anchor="middle">
+    <text x="95" y="32">Commands</text>
+    <text x="235" y="32">Aggregate</text>
+    <text x="440" y="32">Events</text>
+  </g>
+  <g stroke-width="1.5">
+    <g fill="#6fd6f7" stroke="#3aa9cf">
+      <rect x="30" y="50" width="130" height="70" rx="3"/>
+      <rect x="30" y="140" width="130" height="70" rx="3"/>
+      <rect x="30" y="230" width="130" height="70" rx="3"/>
+    </g>
+    <rect x="180" y="50" width="110" height="250" rx="3" fill="#f5cf2d" stroke="#c9a514"/>
+    <g fill="#ffa04b" stroke="#d97f2b">
+      <rect x="310" y="50" width="130" height="70" rx="3"/>
+      <rect x="310" y="140" width="130" height="70" rx="3"/>
+      <rect x="310" y="230" width="130" height="70" rx="3"/>
+      <rect x="450" y="230" width="130" height="70" rx="3"/>
+    </g>
+  </g>
+  <g font-size="15" fill="#1f2328" text-anchor="middle">
+    <text x="95" y="90">Place order</text>
+    <text x="95" y="180">Change address</text>
+    <text x="95" y="270">Cancel order</text>
+    <text x="235" y="180" font-size="18">Order</text>
+    <text x="375" y="90">Order placed</text>
+    <text x="375" y="180">Address changed</text>
+    <text x="375" y="270">Order cancelled</text>
+    <text x="515" y="263">Refund</text>
+    <text x="515" y="282">requested</text>
+  </g>
+</svg>
