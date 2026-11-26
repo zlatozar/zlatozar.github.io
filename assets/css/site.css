@@ -998,7 +998,8 @@ a:hover {
 
 /* Callouts & Epigraphs
    Markdown: a blockquote whose first paragraph is the label, followed by
-   `{: .callout .callout--key}` (or --facilitator, --modeling, --note).
+   `{: .callout .callout--key}` (or --facilitator, --modeling, --note,
+   --commandment).
    ========================================================================== */
 .prose blockquote.callout {
   --callout: var(--ink-muted);
@@ -1064,6 +1065,18 @@ a:hover {
 .prose blockquote.callout--note {
   --callout: var(--ink-muted);
   --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5.5M12 7.5h.01'/%3E%3C/svg%3E");
+}
+
+/* Book rules, e.g. The Little Schemer's commandments and laws */
+.prose blockquote.callout--commandment {
+  --callout: var(--indigo);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21V8a4.5 4.5 0 0 1 9 0v13zM12 21V8a4.5 4.5 0 0 1 9 0v13z'/%3E%3Cpath d='M6 11h3M6 14.5h3M15 11h3M15 14.5h3'/%3E%3C/svg%3E");
+}
+
+.prose blockquote.callout--commandment > p:not(:first-child) {
+  font-size: 1.05em;
+  font-style: italic;
+  line-height: 1.6;
 }
 
 .prose blockquote.epigraph {
