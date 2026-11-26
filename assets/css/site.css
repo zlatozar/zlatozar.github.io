@@ -1121,24 +1121,25 @@ a:hover {
 }
 
 .prose dl.definition dd {
+  position: relative;
   margin: 0.4rem 0 0;
-  padding-left: 1.6em;
+  padding-left: 1.4rem;
   font-size: 1.08em;
   font-style: italic;
   line-height: 1.55;
   color: var(--ink);
-  text-indent: -1.6em;
 }
 
 .prose dl.definition dd::before {
   content: "1";
-  display: inline-block;
-  width: 1.6em;
+  position: absolute;
+  top: 0;
+  left: 0;
   font-family: var(--font-mono);
   font-size: 0.72em;
   font-style: normal;
   font-weight: 600;
-  text-indent: 0;
+  line-height: 2.15;
   color: var(--accent);
 }
 
