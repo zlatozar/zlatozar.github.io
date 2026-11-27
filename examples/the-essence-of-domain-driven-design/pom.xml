@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.2.0</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>io.github.zlatozar</groupId>
+  <artifactId>the-essence-of-domain-driven-design</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <name>The Essence of Domain-Driven Design</name>
+  <description>Companion project for the blog post "The Essence of Domain-Driven Design"</description>
+  <url>https://zlatozar.github.io/the-essence-of-domain-driven-design/</url>
+
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/license/mit</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <java.version>25</java.version>
+    <spring-modulith.version>2.2.0</spring-modulith.version>
+    <jmolecules.version>2025.0.2</jmolecules.version>
+    <archunit.version>1.5.1</archunit.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <openapi-generator.version>7.28.0</openapi-generator.version>
+    <openapi-validator.version>3.0.0</openapi-validator.version>
+    <scalar.version>0.11.0</scalar.version>
+    <spotless.version>3.12.0</spotless.version>
+    <google-java-format.version>2.0.0</google-java-format.version>
+    <!-- `just it` sets this to skip the unit tests and run only the integration tests -->
+    <skipUTs>false</skipUTs>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.modulith</groupId>
+        <artifactId>spring-modulith-bom</artifactId>
+        <version>${spring-modulith.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jmolecules</groupId>
+        <artifactId>jmolecules-bom</artifactId>
+        <version>${jmolecules.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Spring Modulith and jmolecules-archunit bring different ArchUnit versions; use one -->
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.modulith</groupId>
+      <artifactId>spring-modulith-starter-core</artifactId>
+    </dependency>
+    <!-- Stores each event for another module in the same transaction as the change (an outbox) -->
+    <dependency>
+      <groupId>org.springframework.modulith</groupId>
+      <artifactId>spring-modulith-starter-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${mapstruct.version}</version>
+    </dependency>
+    <!-- API reference at /scalar; the page and its script come from the jar, not from a CDN -->
+    <dependency>
+      <groupId>com.scalar.maven</groupId>
+      <artifactId>scalar-webmvc</artifactId>
+      <version>${scalar.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Annotations only. jMolecules names the DDD building blocks; JSpecify marks what may be null -->
+    <dependency>
+      <groupId>org.jmolecules</groupId>
+      <artifactId>jmolecules-ddd</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jmolecules</groupId>
+      <artifactId>jmolecules-events</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Architecture guards: module boundaries, jMolecules DDD rules and hexagonal layers -->
+    <dependency>
+      <groupId>org.springframework.modulith</groupId>
+      <artifactId>spring-modulith-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmolecules.integrations</groupId>
+      <artifactId>jmolecules-archunit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Contract guard: every request and response in an API test is checked against api/*.yaml -->
+    <dependency>
+      <groupId>com.atlassian.oai</groupId>
+      <artifactId>openapi-request-validator-mockmvc</artifactId>
+      <version>${openapi-validator.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <!--
+        Copies api/*.yaml to target/classes/static/openapi, served at /openapi for the API
+        reference (Scalar). A plain resource, so the IntelliJ build copies them too.
+      -->
+      <resource>
+        <directory>api</directory>
+        <targetPath>static/openapi</targetPath>
+        <includes>
+          <include>*.yaml</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
+      <!--
+        The contract comes first: each api/*.yaml generates one API interface and its DTOs.
+        They are module internals, so each package sits inside the module's web adapter.
+      -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator.version}</version>
+        <configuration>
+          <generatorName>spring</generatorName>
+          <modelNameSuffix>Dto</modelNameSuffix>
+          <generateSupportingFiles>false</generateSupportingFiles>
+          <generateApiTests>false</generateApiTests>
+          <generateModelTests>false</generateModelTests>
+          <generateApiDocumentation>false</generateApiDocumentation>
+          <generateModelDocumentation>false</generateModelDocumentation>
+          <!-- Error responses use Spring's ProblemDetail, not a generated class -->
+          <schemaMappings>
+            <schemaMapping>Problem=org.springframework.http.ProblemDetail</schemaMapping>
+          </schemaMappings>
+          <configOptions>
+            <useSpringBoot4>true</useSpringBoot4>
+            <useJackson3>true</useJackson3>
+            <useJspecify>true</useJspecify>
+            <interfaceOnly>true</interfaceOnly>
+            <skipDefaultInterface>true</skipDefaultInterface>
+            <useTags>true</useTags>
+            <useResponseEntity>false</useResponseEntity>
+            <useBeanValidation>true</useBeanValidation>
+            <!-- No @Validated proxy: Spring MVC checks the parameters and answers 400 -->
+            <useSpringBuiltInValidation>true</useSpringBuiltInValidation>
+            <openApiNullable>false</openApiNullable>
+            <documentationProvider>none</documentationProvider>
+            <annotationLibrary>none</annotationLibrary>
+            <hideGenerationTimestamp>true</hideGenerationTimestamp>
+            <!-- A oneOf becomes a sealed interface with one record-like class per shape -->
+            <useOneOfInterfaces>true</useOneOfInterfaces>
+            <useSealed>true</useSealed>
+            <!-- An empty optional field is left out, not sent as null: the contracts have no nulls -->
+            <generateJsonIncludeAnnotations>true</generateJsonIncludeAnnotations>
+            <generateJsonSetterNullsAnnotations>false</generateJsonSetterNullsAnnotations>
+          </configOptions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>department-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/api/department.yaml</inputSpec>
+              <apiPackage>io.github.zlatozar.repair.department.internal.infrastructure.web.generated</apiPackage>
+              <modelPackage>io.github.zlatozar.repair.department.internal.infrastructure.web.generated</modelPackage>
+            </configuration>
+          </execution>
+          <execution>
+            <id>workshop-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/api/workshop.yaml</inputSpec>
+              <apiPackage>io.github.zlatozar.repair.workshop.internal.infrastructure.web.generated</apiPackage>
+              <modelPackage>io.github.zlatozar.repair.workshop.internal.infrastructure.web.generated</modelPackage>
+            </configuration>
+          </execution>
+          <execution>
+            <id>accounting-api</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/api/accounting.yaml</inputSpec>
+              <apiPackage>io.github.zlatozar.repair.accounting.internal.infrastructure.web.generated</apiPackage>
+              <modelPackage>io.github.zlatozar.repair.accounting.internal.infrastructure.web.generated</modelPackage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        MapStruct options for every mapper: a target or source property that is not mapped
+        fails the build, and mappers are Spring beans with constructor injection.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <compilerArgs>
+            <arg>-Amapstruct.unmappedTargetPolicy=ERROR</arg>
+            <arg>-Amapstruct.unmappedSourcePolicy=ERROR</arg>
+            <arg>-Amapstruct.defaultComponentModel=spring</arg>
+            <arg>-Amapstruct.defaultInjectionStrategy=constructor</arg>
+            <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
+            <arg>-Amapstruct.suppressGeneratorVersionInfoComment=true</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <!-- Fail early with a clear message when the JDK or Maven is too old -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-build-environment</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[25,)</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>[3.9,)</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        Unit tests (*Test) run in the `test` phase with Surefire.
+        Integration tests (*IT) run in the `integration-test` phase with Failsafe.
+        These are the default name patterns of both plugins.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>${skipUTs}</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+
+      <!-- `just fmt` formats the code; `verify` fails when the code is not formatted -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <java>
+            <googleJavaFormat>
+              <version>${google-java-format.version}</version>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

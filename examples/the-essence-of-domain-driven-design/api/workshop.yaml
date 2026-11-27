@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: Workshop API
+  version: 1.0.0
+  description: >
+    The workshop repairs the instruments that departments send in approved repair boxes.
+    Each instrument becomes a repair job. A job is started, then it ends repaired or
+    written off. The contract checks words and grammar; the domain has the last word.
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+
+tags:
+  - name: Workshop
+
+paths:
+  /repair-jobs:
+    get:
+      tags: [Workshop]
+      operationId: openJobs
+      summary: List the jobs that are not finished
+      responses:
+        '200':
+          description: The open jobs, sorted by ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenJobs'
+
+  /repair-jobs/{jobId}:
+    get:
+      tags: [Workshop]
+      operationId: viewJob
+      summary: Show one repair job
+      parameters:
+        - $ref: '#/components/parameters/RepairJobId'
+      responses:
+        '200':
+          description: The job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepairJob'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /repair-jobs/{jobId}/start:
+    post:
+      tags: [Workshop]
+      operationId: startRepair
+      summary: Take the instrument out of its box and start the repair
+      description: Starting a started job again changes nothing.
+      parameters:
+        - $ref: '#/components/parameters/RepairJobId'
+      responses:
+        '204':
+          description: The repair has started
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /repair-jobs/{jobId}/outcome:
+    post:
+      tags: [Workshop]
+      operationId: recordOutcome
+      summary: Finish a repair, with its cost or with the reason it failed
+      description: Sending the same outcome again changes nothing; a different one is refused.
+      parameters:
+        - $ref: '#/components/parameters/RepairJobId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Outcome'
+      responses:
+        '204':
+          description: The job is finished
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/ContentTooLarge'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+
+components:
+  parameters:
+    RepairJobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/RepairJobId'
+
+  # Patterns are anchored: JSON Schema finds a pattern anywhere in the text,
+  # Bean Validation matches the whole text. Anchors make both mean the same.
+  schemas:
+    RepairJobId:
+      type: string
+      description: Department, repair box and instrument
+      pattern: '^[A-Z][A-Z_]{1,19}-[1-9][0-9]{0,8}-[A-Z]{2,4}-[0-9]{1,8}$'
+      example: SURGERY-1-SC-1042
+    InstrumentId:
+      type: string
+      pattern: '^[A-Z]{2,4}-[0-9]{1,8}$'
+      example: SC-1042
+
+    # An object, not a bare array: it can get new fields later, such as paging,
+    # without breaking clients.
+    OpenJobs:
+      type: object
+      required: [jobs]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepairJob'
+
+    RepairJob:
+      type: object
+      required: [id, instrument, department, damage, state]
+      properties:
+        id:
+          $ref: '#/components/schemas/RepairJobId'
+        instrument:
+          $ref: '#/components/schemas/InstrumentId'
+        department:
+          type: string
+          example: SURGERY
+        damage:
+          $ref: '#/components/schemas/Damage'
+        state:
+          $ref: '#/components/schemas/JobState'
+        outcome:
+          $ref: '#/components/schemas/Outcome'
+    JobState:
+      type: string
+      description: A finished job also has an outcome
+      enum: [RECEIVED, IN_REPAIR, FINISHED]
+
+    Damage:
+      type: object
+      required: [kind, note]
+      properties:
+        kind:
+          type: string
+          enum: [BLUNT, BENT, BROKEN]
+        note:
+          type: string
+          example: The tip is dull
+
+    # One of two shapes. The "result" field tells which one it is.
+    Outcome:
+      oneOf:
+        - $ref: '#/components/schemas/Repaired'
+        - $ref: '#/components/schemas/WrittenOff'
+      discriminator:
+        propertyName: result
+        mapping:
+          REPAIRED: '#/components/schemas/Repaired'
+          WRITTEN_OFF: '#/components/schemas/WrittenOff'
+    Repaired:
+      type: object
+      required: [result, cost]
+      properties:
+        result:
+          type: string
+          enum: [REPAIRED]
+        cost:
+          $ref: '#/components/schemas/Money'
+    WrittenOff:
+      type: object
+      required: [result, reason]
+      properties:
+        result:
+          type: string
+          enum: [WRITTEN_OFF]
+        reason:
+          type: string
+          description: Why it cannot be repaired. Only spaces are refused with 422.
+          minLength: 1
+          maxLength: 200
+          example: The blade is cracked
+
+    # The amount is text, so no client turns 0.1 into 0.1000000000000000055
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: string
+          description: The currency decides how many decimals are allowed (422 if too many)
+          pattern: '^[0-9]{1,12}(\.[0-9]{1,4})?$'
+          example: '45.50'
+        currency:
+          type: string
+          description: ISO 4217 code
+          pattern: '^[A-Z]{3}$'
+          example: EUR
+
+    # RFC 9457 problem details. Each context has its own copy: it is small, and
+    # a shared file would couple the contracts.
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type:
+          description: Absent means about:blank
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          example: Bad Request
+        status:
+          type: integer
+          format: int32
+          example: 400
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        errors:
+          description: One entry per invalid field
+          type: array
+          items:
+            type: string
+          example: ['reason: size must be between 1 and 200']
+
+  # Errors are also listed as plain JSON. Spring matches the Accept header against these types
+  # even when the answer has no body, so a client that accepts only application/json would get
+  # 406 on a successful POST. The body is still sent as application/problem+json.
+  responses:
+    BadRequest:
+      description: The request breaks the contract
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such repair job
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: The job is not in a state that allows this
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ContentTooLarge:
+      description: The request body is too large
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnprocessableContent:
+      description: The request follows the contract but the domain refuses its values
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -276,6 +276,15 @@ stand on its own. So I use this rule from
 
 With this, I close the task. The result is quite good Scheme code.
 
+Later, a reader pointed me to
+[Roundabout](https://www.cs.uni.edu/~wallingf/patterns/recursion.html), a pattern
+language for recursive programming by Eugene Wallingford, with examples in Scheme. It
+gives names to the kinds of recursion in this task. `trace-all` is a *Structural
+Recursion*: one case for each form of the list. `revert` and `revert-in` from Part 1 are
+an *Interface Procedure* with an *Accumulator Variable*. And `freq`, hidden in `letrec`,
+is a *Local Procedure*: it uses `counter` from `freq-*` directly, instead of passing it
+on every call.
+
 Here is a
 [collection of lectures](https://www.youtube.com/watch?v=Ps8jOj7diA0&list=PL9D558D49CA734A02) that I
 find very useful: Programming Paradigms (CS107) from Stanford, by Jerry Cain. For Scheme,

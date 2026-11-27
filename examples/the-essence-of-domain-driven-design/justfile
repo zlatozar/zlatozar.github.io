@@ -1,0 +1,43 @@
+set shell := ["sh", "-eu", "-c"]
+
+mvn := "mvn --no-transfer-progress"
+
+# List available recipes
+default:
+    @just --list
+
+# Compile, run all tests and check the formatting
+build:
+    {{ mvn }} verify
+
+# Run the unit tests only (fast, no Spring context)
+test:
+    {{ mvn }} test
+
+# Check module boundaries and write module diagrams to target/spring-modulith-docs
+docs:
+    {{ mvn }} test -Dtest=ModularityTest
+
+# Run the integration tests only (the unit tests are skipped)
+it:
+    {{ mvn }} verify -DskipUTs
+
+# Check the formatting without changing files
+check:
+    {{ mvn }} spotless:check
+
+# Format the Java code with google-java-format
+fmt:
+    {{ mvn }} spotless:apply
+
+# Start the application on http://localhost:8080, with the API reference at /scalar
+run:
+    {{ mvn }} spring-boot:run
+
+# Send one scalpel through the three contexts (needs `just run` in another terminal)
+demo:
+    ./demo.sh
+
+# Remove the build output
+clean:
+    {{ mvn }} clean

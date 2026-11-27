@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: Accounting API
+  version: 1.0.0
+  description: >
+    Accounting sees an instrument as an asset: what it cost to buy and what its repairs
+    have cost since. The workshop reports the repairs; this API only reads.
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+
+tags:
+  - name: Accounting
+
+paths:
+  /assets/{instrumentId}:
+    get:
+      tags: [Accounting]
+      operationId: viewAsset
+      summary: Show what an instrument has cost the hospital
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/InstrumentId'
+      responses:
+        '200':
+          description: The asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  # Patterns are anchored: JSON Schema finds a pattern anywhere in the text,
+  # Bean Validation matches the whole text. Anchors make both mean the same.
+  schemas:
+    InstrumentId:
+      type: string
+      description: The code engraved on the instrument
+      pattern: '^[A-Z]{2,4}-[0-9]{1,8}$'
+      example: SC-1042
+
+    Asset:
+      type: object
+      required: [instrument, purchasePrice, repairCost, state, uneconomical]
+      properties:
+        instrument:
+          $ref: '#/components/schemas/InstrumentId'
+        purchasePrice:
+          $ref: '#/components/schemas/Money'
+        repairCost:
+          $ref: '#/components/schemas/Money'
+        state:
+          $ref: '#/components/schemas/AssetState'
+        uneconomical:
+          type: boolean
+          description: The repairs have cost more than the instrument
+    AssetState:
+      type: string
+      enum: [ACTIVE, WRITTEN_OFF]
+
+    # The amount is text, so no client turns 0.1 into 0.1000000000000000055
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: string
+          pattern: '^[0-9]{1,12}(\.[0-9]{1,4})?$'
+          example: '45.50'
+        currency:
+          type: string
+          description: ISO 4217 code
+          pattern: '^[A-Z]{3}$'
+          example: EUR
+
+    # RFC 9457 problem details. Each context has its own copy: it is small, and
+    # a shared file would couple the contracts.
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type:
+          description: Absent means about:blank
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          example: Not Found
+        status:
+          type: integer
+          format: int32
+          example: 404
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        errors:
+          description: One entry per invalid field
+          type: array
+          items:
+            type: string
+
+  # Errors are also listed as plain JSON, so a client that accepts only application/json
+  # does not get 406. The body is still sent as application/problem+json.
+  responses:
+    BadRequest:
+      description: The request breaks the contract
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Accounting has no such instrument, for example a leased one
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -1,0 +1,38 @@
+# Build output
+/target/
+
+# Local Java version selection (jenv, SDKMAN!, mise, asdf)
+.java-version
+.sdkmanrc
+.tool-versions
+mise.toml
+.mise.toml
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+/out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
