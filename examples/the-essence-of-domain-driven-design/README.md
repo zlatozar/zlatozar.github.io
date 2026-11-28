@@ -24,6 +24,12 @@ How to read the code:
 * Start with the domain packages (`*/internal/domain`). They are plain Java, and they
   tell the story without Spring.
 
+[post]: https://zlatozar.github.io/the-essence-of-domain-driven-design/
+[jmolecules]: https://github.com/xmolecules/jmolecules
+[modulith]: https://spring.io/projects/spring-modulith
+[archunit]: https://www.archunit.org/
+[skills]: https://agentskills.io/
+
 ## Run It
 
 You need:
@@ -409,6 +415,34 @@ just build    # both, plus the formatting check
 * **`RepairFlowIT`** sends a scalpel through all three contexts, like the demo.
   `ApiReferenceIT` checks that the Scalar page and the contracts are served.
 
+## Use It With a Coding Agent
+
+The article is the theory, and this project is the practice. The tool is an
+[Agent Skill][skills] in [`skills/ddd-essence/`](skills/ddd-essence/). It guides a coding
+agent through eight phases: the words, the contexts, the building blocks, the
+invariants, the states, the edges, the layers, and the tests. The agent writes a design
+note first. It stops for your approval before it adds a new context or a new aggregate,
+and before it writes code.
+
+The skill does not depend on a language. This Java project is its worked example: the
+design note in
+[`references/instrument-repair.md`](skills/ddd-essence/references/instrument-repair.md)
+is the design of this code. The skill takes its words from your domain experts and
+follows your project's architecture and style, so it works next to your own instructions
+for those layers.
+
+Install it for one repository, or for all your projects:
+
+```bash
+cp -r skills/ddd-essence <your-repo>/.github/skills/   # one repository
+cp -r skills/ddd-essence ~/.copilot/skills/            # all projects
+```
+
+Other agents that support Agent Skills use the same `SKILL.md` format.
+
+The agent loads the skill when a task designs or reviews a domain model. You can also ask
+for it by name: "Use the ddd-essence skill for this feature."
+
 ## Project Layout
 
 ```text
@@ -420,6 +454,11 @@ the-essence-of-domain-driven-design/
 ├── demo.sh                       # the story in curl calls (just demo)
 ├── justfile
 ├── pom.xml
+├── skills/
+│   └── ddd-essence/              # the Agent Skill (see "Use It With a Coding Agent")
+│       ├── SKILL.md
+│       ├── LICENSE.txt           # MIT, so the folder can be copied as is
+│       └── references/           # building blocks, edges, modules, the worked example
 └── src/
     ├── main/java/io/github/zlatozar/repair/
     │   ├── InstrumentRepairApplication.java
@@ -455,5 +494,5 @@ the-essence-of-domain-driven-design/
 
 ## License
 
-The code is under the [MIT License](../../LICENSE). The text of this README is under
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+The code and the Agent Skill are under the [MIT License](../../LICENSE). The text of this
+README is under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

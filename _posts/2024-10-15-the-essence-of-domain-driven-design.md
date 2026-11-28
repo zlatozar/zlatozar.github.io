@@ -5,6 +5,7 @@ description: "The text of my DEV.BG talk about the philosophy behind Domain-Driv
 date: 2024-10-15 19:30:00 +0300
 categories: [Architecture]
 tags: [ddd, domain-modeling, value-objects, entities, aggregates, bounded-context, talks]
+example: the-essence-of-domain-driven-design
 ---
 
 *This is the text of my talk at
